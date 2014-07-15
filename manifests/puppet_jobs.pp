@@ -1,5 +1,10 @@
 class puppet_openstack_tester::puppet_jobs {
 
+  File {
+    notify  => Exec['jenkins_jobs_update'],
+    require => Exec['install_jenkins_job_builder'],
+  }
+
   file { '/etc/jenkins_jobs/config/openstack_unit_test.yml':
     content =>
 "
@@ -38,55 +43,54 @@ class puppet_openstack_tester::puppet_jobs {
     jobs:
       - puppet-module-unit
 ",
-    notify  => Exec['jenkins_jobs_update'],
-    require => Exec['install_jenkins_job_builder'],
   }
 
-#  file { "/etc/jenkins_jobs/config/openstack_test.yml":
-#    content =>
-#'- defaults:
-#    name: global
-#    zuul-url: http://127.0.0.1:8001/jenkins_endpoint
-#- job:
-#    name : gate-puppet-dev-env
-#    project-type: freestyle
-#    defaults: global
-#    disabled: false
-#    concurrent: true
-#    quiet-period: 0
-#    block-downstream: false
-#    block-upstream: false
-#    builders:
-#      - shell: |
-#          #!/bin/bash
-#          set -x
-#          set -e
-#          set -u
-#
-#          export module_install_method="librarian"
-#          export operatingsystem="ubuntu"
-#          export openstack_version="grizzly"
-#          export test_mode="puppet_openstack"
-#          export ref=`echo $ZUUL_CHANGES | awk -F":" \'{print $3}\'`
-#          export cherry_pick_command="git fetch https://review.openstack.org/$ZUUL_PROJECT $ref && git cherry-pick FETCH_HEAD"
-#
-#          # get the name of the directory where we need to change code
-#          project=`echo $ZUUL_PROJECT | sed -e "s/stackforge\/puppet-//g"`
-#          export module_repo="modules/${project}"
-#
-#          mkdir $BUILD_ID
-#          cd $BUILD_ID
-#          git clone "git://github.com/stackforge/puppet-openstack_dev_env"
-#          cd puppet-openstack_dev_env
-#          echo `pwd`
-#          export checkout_branch_command="${cherry_pick_command:-}"
-#
-#          bash -xe test_scripts/openstack_test.sh
-#    triggers:
-#      - zuul
-#',
-#    notify  => Exec['jenkins_jobs_update'],
-#    require => Exec['install_jenkins_job_builder', 'reload_account_config'],
-#  }
-#
+  file { "/etc/jenkins_jobs/config/openstack_integration_test.yml":
+    content =>
+'- defaults:
+    name: global
+    zuul-url: http://127.0.0.1:8001/jenkins_endpoint
+- job:
+    name : gate-puppet-integration
+    project-type: freestyle
+    defaults: global
+    disabled: false
+    concurrent: true
+    quiet-period: 0
+    block-downstream: false
+    block-upstream: false
+    builders:
+     - shell: |
+          #!/bin/bash
+          set -x
+          set -e
+          set -u
+
+          # build the cherry-pick command to get the correct commit
+          export ref=`echo $ZUUL_CHANGES | awk -F":" \'{print $3}\'`
+          export cherry_pick_command="git fetch https://review.openstack.org/$ZUUL_PROJECT $ref && git cherry-pick FETCH_HEAD"
+
+          # get the name of the directory where we need to change code
+          project=`echo $ZUUL_PROJECT | sed -e "s/stackforge\/puppet-//g"`
+          export module_repo="modules/${project}"
+
+          mkdir $BUILD_ID
+          cd $BUILD_ID
+          git clone "https://github.com/bodepd/puppet_openstack_builder"
+          cd puppet_openstack_builder
+          echo `pwd`
+          export checkout_branch_command="${cherry_pick_command:-}"
+          source /home/jenkins-slave/heat.sh
+          # create stack
+          stack_name="puppet_integration_${BUILD_ID}"
+          heat stack-create $stack_name -P pre_puppet_commands="cd /etc/puppet/${module_repo} && ${checkout_branch_command}" -f heat_templates/openstack_2_role.yaml
+          # parse out public ip
+          # this is complicated b/c I have to know when puppet finished
+          # and if it finished correctly
+          # ssh in and run test!!!
+    triggers:
+      - zuul
+',
+  }
+
 }
