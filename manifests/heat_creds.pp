@@ -5,9 +5,9 @@
 # for a regular openstack deployment)
 #
 class puppet_openstack_tester::heat_creds(
-  $filename,
   $username,
   $password,
+  $local_user,
   $heat_endpoint,
   $keystone_endpoint,
   $tenant_id,
@@ -16,13 +16,18 @@ class puppet_openstack_tester::heat_creds(
   $openstack_private_key = '',
 ) {
 
-  file { $filename:
+  File {
+    owner   => $local_user,
+    group   => $local_user,
+  }
+
+  file { "/home/${local_user}/heat.sh":
     content => template('puppet_openstack_tester/heat_creds.sh.erb'),
   }
 
   if $openstack_private_key != '' {
-    ensure_resource( 'file', '/root/.ssh/', {'ensure' => 'directory' })
-    file { '/root/.ssh/id_rsa':
+    ensure_resource( 'file', "/home/${local_user}/.ssh", {'ensure' => 'directory' })
+    file { "/home/${local_user}/.ssh/id_rsa":
       content => $openstack_private_key,
       mode    => '0600',
     }
