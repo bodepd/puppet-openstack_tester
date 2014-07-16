@@ -33,3 +33,52 @@ projects:
   - name: stackforge/puppet-openstack_dev_env
     check:
       - gate-puppet-integration
+
+  - name: stackforge/puppet-openstack_
+    check:
+      - gate-puppet-integration
+
+  - name: stackforge/puppet-vswitch
+    check:
+      - gate-puppet-integration
+
+  - name: stackforge/puppet-openstack_extras
+    check:
+      - gate-puppet-integration
+
+  - name: stackforge/puppet-openstacklib
+    check:
+      - gate-puppet-integration
+
+  - name: stackforge/puppet-nova
+    check:
+      - gate-puppet-integration
+
+  - name: stackforge/puppet-keystone
+    check:
+      - gate-puppet-integration
+
+  - name: stackforge/puppet-neutron
+    check:
+      - gate-puppet-integration
+
+  - name: stackforge/puppet-horizon
+    check:
+      - gate-puppet-integration
+
+  - name: stackforge/puppet-heat
+    check:
+      - gate-puppet-integration
+
+  - name: stackforge/puppet-cinder
+    check:
+      - gate-puppet-integration
+
+  - name: stackforge/puppet-ceilometer
+    check:
+      - gate-puppet-integration
+
+  - name: stackforge/puppet-glance
+    check:
+      - gate-puppet-integration
+
