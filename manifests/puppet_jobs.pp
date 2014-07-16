@@ -84,10 +84,9 @@ class puppet_openstack_tester::puppet_jobs {
           # create stack
           stack_name="puppet_integration_${BUILD_ID}"
           heat stack-create $stack_name -P pre_puppet_commands="cd /etc/puppet/${module_repo} && ${checkout_branch_command}" -f heat_templates/openstack_2_role.yaml
-          # parse out public ip
-          # this is complicated b/c I have to know when puppet finished
-          # and if it finished correctly
-          # ssh in and run test!!!
+          # call to an external script to block until the stack is complete
+          # and then run our test
+          ruby test_scripts/wait_until_stack_ready.rb $stack_name
     triggers:
       - zuul
 ',
