@@ -4,7 +4,7 @@
 # if this is the same as what is required
 # for a regular openstack deployment)
 #
-class puppet_openstack_tester::heat_creds(
+class openstack_tester::heat_creds(
   $username,
   $password,
   $local_user,

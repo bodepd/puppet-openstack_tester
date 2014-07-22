@@ -1,4 +1,4 @@
-class puppet_openstack_tester::puppet_jobs {
+class openstack_tester::puppet_jobs {
 
   File {
     notify  => Exec['jenkins_jobs_update'],
