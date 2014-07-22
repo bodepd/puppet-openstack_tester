@@ -22,7 +22,7 @@ class openstack_tester::heat_creds(
   }
 
   file { "/home/${local_user}/heat.sh":
-    content => template('puppet_openstack_tester/heat_creds.sh.erb'),
+    content => template('openstack_tester/heat_creds.sh.erb'),
   }
 
   if $openstack_private_key != '' {
